@@ -18,10 +18,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (!blob || blob.statusCode !== 200) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
 
   const safeName = resource.fileName.replace(/[\r\n"\\]/g, '_')
+  const mimeType = resource.mimeType.toLowerCase()
+  const inlineSafe = mimeType === 'application/pdf' || /^(image\/(png|jpeg|gif|webp|avif)|audio\/[a-z0-9.+-]+|video\/[a-z0-9.+-]+)$/.test(mimeType)
+  const disposition = new URL(request.url).searchParams.get('inline') === '1' && inlineSafe ? 'inline' : 'attachment'
   return new NextResponse(blob.stream, {
     headers: {
       'Content-Type': resource.mimeType,
-      'Content-Disposition': `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(resource.fileName)}`,
+      'Content-Disposition': `${disposition}; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(resource.fileName)}`,
       'Cache-Control': 'private, no-store',
       'X-Content-Type-Options': 'nosniff',
     },

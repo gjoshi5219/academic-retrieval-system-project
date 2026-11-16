@@ -1,6 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { cookies } from 'next/headers'
 import './globals.css'
+import './library-features.css'
 
 export const metadata: Metadata = {
   title: 'Smart Library — Campus Resource Library',
@@ -17,10 +19,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
+  colorScheme: 'light dark',
   themeColor: '#f7f8f5',
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body className="antialiased">{children}{process.env.NODE_ENV === 'production' && <Analytics />}</body></html>
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const theme = (await cookies()).get('theme')?.value === 'dark' ? 'dark' : 'light'
+  return <html lang="en" data-theme={theme}><body className="antialiased">{children}{process.env.NODE_ENV === 'production' && <Analytics />}</body></html>
 }
