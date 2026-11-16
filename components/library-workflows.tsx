@@ -124,7 +124,7 @@ export function RequestsPanel({ isTeacher, requests, onRequest, onCreated }: { i
   return <section className="workspace-panel"><div className="workspace-heading"><div><span className="eyebrow">{isTeacher ? 'FACULTY WORKSPACE' : 'YOUR LIBRARY'}</span><h2>{isTeacher ? 'Student resource requests' : 'Resource requests'}</h2><p>{isTeacher ? 'Review what students need and keep each request moving.' : 'Ask faculty for notes or a PDF, then check its progress here.'}</p></div>{!isTeacher && <button className="primary-button" onClick={onRequest}><Plus size={15} /> Request a resource</button>}</div>{error && <p className="form-error" role="alert">{error}</p>}{requests.length ? <div className="workflow-list">{requests.map((request) => <article className="workflow-row" key={request.id}><div className="workflow-icon"><FileText size={18} /></div><div className="workflow-copy"><div className="workflow-title-line"><h3>{request.title}</h3><span className={`status-pill status-${request.status.toLowerCase()}`}>{request.status}</span></div><p>{request.course}{isTeacher ? ` · Requested by ${request.requesterName}` : ''}</p>{request.details && <small>{request.details}</small>}<time dateTime={new Date(request.createdAt).toISOString()}>Requested {dateLabel(request.createdAt)}</time></div>{isTeacher && <label className="status-control"><span>Status</span><select aria-label={`Update ${request.title} status`} disabled={updating === request.id} value={request.status} onChange={(event) => void setStatus(request.id, event.target.value)}><option>Pending</option><option>Approved</option><option>Uploaded</option></select></label>}</article>)}</div> : <div className="workflow-empty"><FileText size={22} /><h3>No resource requests yet</h3><p>{isTeacher ? 'Student requests will appear here.' : 'Your requests and their status will show up here.'}</p></div>}</section>
 }
 
-export function ReportsPanel({ reports }: { reports: ReportRecord[] }) {
+export function ReportsPanel({ reports, onReportsChange }: { reports: ReportRecord[]; onReportsChange?: (reports: ReportRecord[]) => void }) {
   const [items, setItems] = useState(reports)
   const [error, setError] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
@@ -133,12 +133,18 @@ export function ReportsPanel({ reports }: { reports: ReportRecord[] }) {
     const before = items.find((report) => report.id === id)?.status
     setUpdating(id)
     setError('')
-    setItems((previous) => previous.map((report) => report.id === id ? { ...report, status } : report))
+    const updatedItems = items.map((report) => report.id === id ? { ...report, status } : report)
+    setItems(updatedItems)
+    onReportsChange?.(updatedItems)
     try {
       await updateProblemReportStatus(id, status)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Could not update this report.')
-      if (before) setItems((previous) => previous.map((report) => report.id === id ? { ...report, status: before } : report))
+      if (before) {
+        const restoredItems = items.map((report) => report.id === id ? { ...report, status: before } : report)
+        setItems(restoredItems)
+        onReportsChange?.(restoredItems)
+      }
     } finally {
       setUpdating(null)
     }
