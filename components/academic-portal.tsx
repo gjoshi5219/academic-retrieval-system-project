@@ -144,7 +144,7 @@ export function AcademicPortal({ user, theme, initialResources, initialBookmarks
             })}
             {!filteredResources.length && <div className="empty-state"><div className="empty-icon"><BookOpen size={22} /></div><h3>{bookmarksOnly ? 'No bookmarks yet' : 'No resources found'}</h3><p>{bookmarksOnly ? 'Save a resource with the bookmark icon and it will be waiting here.' : 'Try another search or category. Your next great study resource may be one click away.'}</p>{bookmarksOnly ? <button className="text-button" onClick={() => setBookmarksOnly(false)}>Explore all resources <ArrowRight size={15} /></button> : null}</div>}
           </div>
-          <footer className="content-footer"><span>Showing priority-ranked campus resources</span><span>Made for curious minds <Sparkles size={13} /></span></footer>
+          <footer className="content-footer"><span>Showing priority-ranked campus resources</span></footer>
           </>}
         </div>
       </section>
