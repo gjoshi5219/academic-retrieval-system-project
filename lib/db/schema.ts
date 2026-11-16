@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core'
+import { boolean, integer, pgTable, primaryKey, text, timestamp, unique } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -70,3 +70,34 @@ export const bookmarks = pgTable('bookmarks', {
   resourceId: text('resourceId').notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 }, (table) => [unique().on(table.userId, table.resourceId)])
+
+export const resourceReports = pgTable('resource_reports', {
+  id: text('id').primaryKey(),
+  reporterId: text('reporter_id').notNull(),
+  reporterName: text('reporter_name').notNull().default(''),
+  resourceId: text('resource_id'),
+  resourceTitle: text('resource_title').notNull().default(''),
+  course: text('course').notNull().default(''),
+  reason: text('reason').notNull(),
+  details: text('details').notNull().default(''),
+  status: text('status').notNull().default('Open'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+export const resourceRequests = pgTable('resource_requests', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  requesterName: text('requester_name').notNull(),
+  title: text('title').notNull(),
+  course: text('course').notNull(),
+  details: text('details').notNull().default(''),
+  status: text('status').notNull().default('Pending'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
+export const resourceViews = pgTable('resource_views', {
+  userId: text('user_id').notNull(),
+  resourceId: text('resource_id').notNull(),
+  viewedAt: timestamp('viewed_at').notNull().defaultNow(),
+}, (table) => [primaryKey({ columns: [table.userId, table.resourceId] })])
